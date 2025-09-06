@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Chatbot from './components/Chatbot';
+import LocalStorageSync from './components/LocalStorageSync';
 
 export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -201,12 +202,15 @@ export default function Home() {
 
       {/* Chatbot */}
       <Chatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      
+      {/* LocalStorage Sync Component */}
+      <LocalStorageSync />
 
       {/* Floating Chat Button */}
       {!isChatOpen && (
         <button
           onClick={() => setIsChatOpen(true)}
-          className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-40"
+          className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
         >
           💬
         </button>

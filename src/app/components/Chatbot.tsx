@@ -201,6 +201,19 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
         satisfaction: msg.satisfaction
       }));
 
+      // Save chat history to localStorage for admin dashboard
+      const localStorageData = {
+        sessionId,
+        userId,
+        reason: 'Customer satisfaction threshold reached',
+        chatHistory,
+        timestamp: new Date().toISOString(),
+        attempts: unsatisfiedCount
+      };
+      
+      localStorage.setItem('escalationData', JSON.stringify(localStorageData));
+      console.log('Chat history saved to localStorage:', localStorageData);
+
       // First, check escalation status
       const escalationResponse = await fetch('/api/escalate', {
         method: 'POST',
@@ -219,10 +232,19 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
       if (escalationData.escalate) {
         setShowEscalation(true);
         
+        // Trigger call initiation event for localStorage sync
+        const callInitiatedEvent = new CustomEvent('callInitiated', {
+          detail: {
+            callId: escalationData.callCentre?.callId || 'N/A',
+            ticketId: escalationData.callCentre?.ticketId || 'N/A'
+          }
+        });
+        window.dispatchEvent(callInitiatedEvent);
+
         // Add escalation message to chat
         const escalationMessage: Message = {
           id: `escalation-${Date.now()}`,
-          text: `${escalationData.message}\n\nTicket ID: ${escalationData.callCentre.ticketId}`,
+          text: `We're connecting you to our call centre for personalized assistance.\n\nTicket ID: ${escalationData.callCentre?.ticketId || 'N/A'}`,
           isUser: false,
           timestamp: new Date(),
           satisfaction: null,

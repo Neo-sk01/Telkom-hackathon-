@@ -101,6 +101,37 @@ async function initiateCallCentreCall(data: CallRequest): Promise<CallResponse> 
       timestamp: new Date().toISOString()
     });
 
+    // After initiateCall, populate admin dashboard with localStorage data
+    try {
+      // In a real scenario, this would be handled client-side or through a webhook
+      // For now, we'll create a ticket with the call information
+      const ticketData = {
+        ticketId: `TLK-CALL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        sessionId: data.sessionId,
+        userId: 'user-telkom-12345',
+        reason: `Call initiated: ${data.issue}`,
+        attempts: 1,
+        timestamp: new Date().toISOString(),
+        chatHistory: [], // This will be populated from localStorage on the client side
+        callId: callId,
+        customerPhone: data.customerPhone,
+        urgency: data.urgency
+      };
+
+      // Send to admin dashboard
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002'}/api/admin/tickets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ticketData)
+      });
+
+      console.log('Call ticket created for admin dashboard:', ticketData.ticketId);
+    } catch (error) {
+      console.error('Failed to create call ticket for admin dashboard:', error);
+    }
+
     return callResponse;
 
   } catch (error) {

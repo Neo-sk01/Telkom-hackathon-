@@ -111,6 +111,27 @@ async function escalateToCallCentre(data: {
     timestamp: new Date().toISOString()
   });
 
+  // Send ticket data to admin dashboard
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/tickets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ticketId,
+        sessionId: data.sessionId,
+        userId: 'user-telkom-12345',
+        reason: data.reason,
+        attempts: data.attempts,
+        timestamp: new Date().toISOString(),
+        chatHistory: data.chatHistory
+      })
+    });
+  } catch (error) {
+    console.error('Failed to send ticket to admin dashboard:', error);
+  }
+
   // In production, you might:
   // 1. Create a ticket in your CRM system
   // 2. Send notification to call centre agents

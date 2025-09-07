@@ -306,6 +306,16 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
       return;
     }
     
+    // Save phone number to localStorage
+    const phoneData = {
+      sessionId,
+      userId,
+      phoneNumber,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('customerPhoneData', JSON.stringify(phoneData));
+    console.log('Phone number saved to localStorage:', phoneData);
+    
     await initiatePhoneCall(phoneNumber, pendingChatHistory);
   };
 

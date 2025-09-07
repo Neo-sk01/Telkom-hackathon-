@@ -12,6 +12,7 @@ interface EscalationTicket {
   ticketId: string;
   sessionId: string;
   userId: string;
+  phoneNumber?: string;
   reason: string;
   attempts: number;
   timestamp: string;
@@ -33,10 +34,23 @@ export default function AdminDashboard() {
   const [selectedTicket, setSelectedTicket] = useState<EscalationTicket | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'summary' | 'details' | 'history'>('summary');
+  const [phoneData, setPhoneData] = useState<{sessionId: string; userId: string; phoneNumber: string; timestamp: string} | null>(null);
 
   useEffect(() => {
     fetchTickets();
+    loadPhoneData();
   }, []);
+
+  const loadPhoneData = () => {
+    try {
+      const storedPhoneData = localStorage.getItem('customerPhoneData');
+      if (storedPhoneData) {
+        setPhoneData(JSON.parse(storedPhoneData));
+      }
+    } catch (error) {
+      console.error('Failed to load phone data from localStorage:', error);
+    }
+  };
 
   const fetchTickets = async () => {
     try {
@@ -321,6 +335,14 @@ export default function AdminDashboard() {
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
                                 <p className="text-sm text-gray-900 bg-white p-3 rounded-lg border">{selectedTicket.userId}</p>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <p className="text-sm text-gray-900 bg-white p-3 rounded-lg border">
+                                  {phoneData && phoneData.sessionId === selectedTicket.sessionId 
+                                    ? phoneData.phoneNumber 
+                                    : selectedTicket.phoneNumber || 'Not provided'}
+                                </p>
                               </div>
                             </div>
                             <div className="space-y-4">

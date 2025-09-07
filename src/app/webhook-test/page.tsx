@@ -78,8 +78,8 @@ export default function WebhookTest() {
                 type="url"
                 value={n8nUrl}
                 onChange={(e) => setN8nUrl(e.target.value)}
-                //placeholder="https://khvvtso.app.n8n.cloud/webhook/9b5f7142-0410-4e8d-ad62-f8d63fd39052"
-                placeholder="https://khvvtso.app.n8n.cloud/webhook-test/9b5f7142-0410-4e8d-ad62-f8d63fd3905"
+                placeholder="https://khvvtso.app.n8n.cloud/webhook/9b5f7142-0410-4e8d-ad62-f8d63fd39052"
+                //placeholder="https://khvvtso.app.n8n.cloud/webhook-test/9b5f7142-0410-4e8d-ad62-f8d63fd3905"
                 
                 
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 font-medium text-gray-800 placeholder-gray-400 bg-gray-50 hover:bg-white"

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { summarizeChatHistory } from '../../../utils/chatSummarizer';
 
 interface ChatMessage {
   message: string;
@@ -16,6 +17,14 @@ interface EscalationTicket {
   chatHistory: ChatMessage[];
   status: 'open' | 'in_progress' | 'resolved';
   assignedAgent?: string;
+  summary?: {
+    summary: string;
+    keyIssues: string[];
+    customerSentiment: 'positive' | 'neutral' | 'negative';
+    escalationTriggers: string[];
+    messageCount: number;
+    duration: string;
+  };
 }
 
 // In-memory storage for demo purposes
@@ -98,7 +107,9 @@ export async function POST(request: NextRequest) {
       timestamp: data.timestamp || new Date().toISOString(),
       chatHistory: data.chatHistory || [],
       status: 'open',
-      assignedAgent: undefined
+      assignedAgent: undefined,
+      summary: data.chatHistory && data.chatHistory.length > 0 ? 
+        summarizeChatHistory(data.chatHistory) : undefined
     };
 
     tickets.set(ticket.ticketId, ticket);
@@ -152,6 +163,8 @@ export async function PATCH(request: NextRequest) {
     }
     if (chatHistory) {
       ticket.chatHistory = chatHistory;
+      // Regenerate summary when chat history is updated
+      ticket.summary = summarizeChatHistory(chatHistory);
     }
     if (sessionId) {
       ticket.sessionId = sessionId;

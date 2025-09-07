@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Try to create the ticket first
-    const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/admin/tickets`, {
+    const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/tickets`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // If creation fails (ticket might already exist), try to update
     if (!createResponse.ok) {
-      const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/admin/tickets`, {
+      const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/tickets`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

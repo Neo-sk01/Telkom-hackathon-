@@ -18,12 +18,21 @@ interface EscalationTicket {
   chatHistory: ChatMessage[];
   status: 'open' | 'in_progress' | 'resolved';
   assignedAgent?: string;
+  summary?: {
+    summary: string;
+    keyIssues: string[];
+    customerSentiment: 'positive' | 'neutral' | 'negative';
+    escalationTriggers: string[];
+    messageCount: number;
+    duration: string;
+  };
 }
 
 export default function AdminDashboard() {
   const [tickets, setTickets] = useState<EscalationTicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<EscalationTicket | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'summary' | 'details' | 'history'>('summary');
 
   useEffect(() => {
     fetchTickets();
@@ -69,35 +78,52 @@ export default function AdminDashboard() {
     }
   };
 
+  const getSentimentColor = (sentiment: string) => {
+    switch (sentiment) {
+      case 'positive': return 'bg-green-100 text-green-800';
+      case 'negative': return 'bg-red-100 text-red-800';
+      case 'neutral': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading tickets...</p>
+          <p className="mt-4 text-blue-700 font-medium">Loading tickets...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-lg border-b-4 border-blue-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Telkom Admin Dashboard</h1>
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                <span className="text-white font-bold text-xl">T</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-blue-900">Telkom Admin Dashboard</h1>
+                <p className="text-blue-600 text-sm">Call Centre Management</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">
-                {tickets.length} Total Tickets
-              </span>
+              <div className="bg-blue-100 px-4 py-2 rounded-lg">
+                <span className="text-sm font-semibold text-blue-800">
+                  {tickets.length} Total Tickets
+                </span>
+              </div>
               <button
                 onClick={fetchTickets}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md"
               >
-                Refresh
+                🔄 Refresh
               </button>
             </div>
           </div>
@@ -105,137 +131,272 @@ export default function AdminDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Tickets List */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Escalation Tickets */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Escalation Tickets</h2>
+            <div className="bg-white rounded-xl shadow-lg border border-blue-100">
+              <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-xl">
+                <h2 className="text-lg font-semibold text-white flex items-center">
+                  🎫 Escalation Tickets
+                </h2>
               </div>
-              <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+              <div className="divide-y divide-blue-50 max-h-96 overflow-y-auto">
                 {tickets.map((ticket) => (
                   <div
                     key={ticket.ticketId}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                      selectedTicket?.ticketId === ticket.ticketId ? 'bg-blue-50' : ''
+                    className={`p-4 cursor-pointer hover:bg-blue-50 transition-colors ${
+                      selectedTicket?.ticketId === ticket.ticketId ? 'bg-blue-100 border-l-4 border-blue-600' : ''
                     }`}
                     onClick={() => setSelectedTicket(ticket)}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-semibold text-blue-900 truncate">
                           {ticket.ticketId}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-blue-600">
                           {formatTimestamp(ticket.timestamp)}
                         </p>
                       </div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
                         {ticket.status}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-gray-600 truncate">
+                    <p className="text-xs text-gray-600 truncate mb-2">
                       {ticket.reason}
                     </p>
+                    {ticket.summary && (
+                      <div className="flex items-center space-x-2">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getSentimentColor(ticket.summary.customerSentiment)}`}>
+                          {ticket.summary.customerSentiment}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {ticket.summary.messageCount} msgs
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ))}
                 {tickets.length === 0 && (
-                  <div className="p-8 text-center text-gray-500">
-                    No escalation tickets found
+                  <div className="p-8 text-center text-blue-400">
+                    <div className="text-4xl mb-2">📋</div>
+                    <p>No escalation tickets found</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Ticket Details */}
-          <div className="lg:col-span-2">
+          {/* Main Content Area */}
+          <div className="lg:col-span-3">
             {selectedTicket ? (
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-medium text-gray-900">
-                      Ticket Details: {selectedTicket.ticketId}
-                    </h2>
-                    <div className="flex space-x-2">
-                      <select
-                        value={selectedTicket.status}
-                        onChange={(e) => updateTicketStatus(selectedTicket.ticketId, e.target.value)}
-                        className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+              <div className="space-y-6">
+                {/* Tab Navigation */}
+                <div className="bg-white rounded-xl shadow-lg border border-blue-100">
+                  <div className="border-b border-blue-100">
+                    <nav className="flex space-x-8 px-6" aria-label="Tabs">
+                      <button
+                        onClick={() => setActiveTab('summary')}
+                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                          activeTab === 'summary'
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'
+                        }`}
                       >
-                        <option value="open">Open</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                      </select>
-                    </div>
+                        📊 Chat Summary
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('details')}
+                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                          activeTab === 'details'
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'
+                        }`}
+                      >
+                        🎫 Ticket Details
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('history')}
+                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                          activeTab === 'history'
+                            ? 'border-blue-600 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'
+                        }`}
+                      >
+                        💬 Chat History
+                      </button>
+                    </nav>
                   </div>
                 </div>
-                
-                <div className="p-6">
-                  {/* Ticket Info */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Session ID</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedTicket.sessionId}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">User ID</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedTicket.userId}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Attempts</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedTicket.attempts}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Created</label>
-                      <p className="mt-1 text-sm text-gray-900">{formatTimestamp(selectedTicket.timestamp)}</p>
+
+                {/* Tab Content */}
+                <div className="bg-white rounded-xl shadow-lg border border-blue-100">
+                  <div className="px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-xl">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-white">
+                        {activeTab === 'summary' && '📊 Conversation Summary'}
+                        {activeTab === 'details' && '🎫 Ticket Details'}
+                        {activeTab === 'history' && '💬 Chat History'}
+                      </h2>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-blue-100 text-sm font-medium">
+                          {selectedTicket.ticketId}
+                        </span>
+                        <select
+                          value={selectedTicket.status}
+                          onChange={(e) => updateTicketStatus(selectedTicket.ticketId, e.target.value)}
+                          className="border border-blue-300 rounded-lg px-3 py-1 text-sm bg-white text-blue-900 font-medium"
+                        >
+                          <option value="open">Open</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="resolved">Resolved</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
+                  
+                  <div className="p-6">
+                    {/* Chat Summary Tab */}
+                    {activeTab === 'summary' && selectedTicket.summary && (
+                      <div className="space-y-6">
+                        {/* Main Summary */}
+                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
+                          <h3 className="text-lg font-semibold text-blue-900 mb-3">Conversation Overview</h3>
+                          <p className="text-blue-800 leading-relaxed mb-4">{selectedTicket.summary.summary}</p>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-white rounded-lg p-4 border border-blue-200">
+                              <div className="text-2xl font-bold text-blue-600">{selectedTicket.summary.messageCount}</div>
+                              <div className="text-sm text-blue-700">Total Messages</div>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 border border-blue-200">
+                              <div className="text-2xl font-bold text-blue-600">{selectedTicket.summary.duration}</div>
+                              <div className="text-sm text-blue-700">Duration</div>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 border border-blue-200">
+                              <div className="text-2xl font-bold text-red-600">{selectedTicket.summary.escalationTriggers.length}</div>
+                              <div className="text-sm text-blue-700">Unhelpful Responses</div>
+                            </div>
+                          </div>
+                        </div>
 
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Reason</label>
-                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{selectedTicket.reason}</p>
-                  </div>
-
-                  {/* Chat History */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Chat History</label>
-                    <div className="border border-gray-200 rounded-md max-h-96 overflow-y-auto">
-                      {selectedTicket.chatHistory.map((msg, index) => (
-                        <div key={index} className="p-3 border-b border-gray-100 last:border-b-0">
-                          <div className="flex justify-between items-start mb-1">
-                            <span className="text-xs text-gray-500">
-                              {formatTimestamp(msg.timestamp)}
-                            </span>
-                            {msg.satisfaction !== undefined && (
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                msg.satisfaction === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                              }`}>
-                                {msg.satisfaction === 1 ? 'Helpful' : 'Not Helpful'}
+                        {/* Key Issues */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Issues Identified</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedTicket.summary.keyIssues.map((issue, index) => (
+                              <span key={index} className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                {issue}
                               </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Customer Sentiment */}
+                        <div className="bg-white border border-gray-200 rounded-xl p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Sentiment Analysis</h3>
+                          <div className="flex items-center space-x-4">
+                            <span className={`inline-flex items-center px-6 py-3 rounded-full text-lg font-semibold ${getSentimentColor(selectedTicket.summary.customerSentiment)}`}>
+                              {selectedTicket.summary.customerSentiment === 'positive' && '😊 Positive'}
+                              {selectedTicket.summary.customerSentiment === 'neutral' && '😐 Neutral'}
+                              {selectedTicket.summary.customerSentiment === 'negative' && '😞 Negative'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ticket Details Tab */}
+                    {activeTab === 'details' && (
+                      <div className="space-y-6">
+                        {/* Ticket Information */}
+                        <div className="bg-gray-50 rounded-xl p-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-4">Ticket Information</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Session ID</label>
+                                <p className="text-sm text-gray-900 bg-white p-3 rounded-lg border">{selectedTicket.sessionId}</p>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                                <p className="text-sm text-gray-900 bg-white p-3 rounded-lg border">{selectedTicket.userId}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Escalation Attempts</label>
+                                <p className="text-sm text-gray-900 bg-white p-3 rounded-lg border">{selectedTicket.attempts}</p>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Created</label>
+                                <p className="text-sm text-gray-900 bg-white p-3 rounded-lg border">{formatTimestamp(selectedTicket.timestamp)}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Escalation Reason */}
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                          <h3 className="text-lg font-semibold text-red-900 mb-3">Escalation Reason</h3>
+                          <p className="text-red-800 bg-white p-4 rounded-lg border border-red-200">{selectedTicket.reason}</p>
+                        </div>
+                      </div>
+                    )}
+
+
+                    {/* Chat History Tab */}
+                    {activeTab === 'history' && (
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 rounded-xl p-4">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-4">Complete Conversation</h3>
+                          <div className="space-y-3 max-h-96 overflow-y-auto">
+                            {selectedTicket.chatHistory.map((msg, index) => (
+                              <div key={index} className={`p-4 rounded-lg border ${
+                                index % 2 === 0 ? 'bg-blue-50 border-blue-200 ml-0 mr-8' : 'bg-white border-gray-200 ml-8 mr-0'
+                              }`}>
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                      index % 2 === 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {index % 2 === 0 ? '🤖 Bot' : '👤 Customer'}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      {formatTimestamp(msg.timestamp)}
+                                    </span>
+                                  </div>
+                                  {msg.satisfaction !== undefined && (
+                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                      msg.satisfaction === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {msg.satisfaction === 1 ? '👍 Helpful' : '👎 Not Helpful'}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-900 leading-relaxed">{msg.message}</p>
+                              </div>
+                            ))}
+                            {selectedTicket.chatHistory.length === 0 && (
+                              <div className="p-8 text-center text-gray-400">
+                                <div className="text-4xl mb-2">💬</div>
+                                <p>No chat history available</p>
+                              </div>
                             )}
                           </div>
-                          <p className="text-sm text-gray-900">{msg.message}</p>
                         </div>
-                      ))}
-                      {selectedTicket.chatHistory.length === 0 && (
-                        <div className="p-4 text-center text-gray-500 text-sm">
-                          No chat history available
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow p-8 text-center">
-                <div className="text-gray-400 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+              <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-12 text-center">
+                <div className="text-blue-300 mb-6">
+                  <div className="text-6xl mb-4">🎫</div>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Ticket</h3>
-                <p className="text-gray-500">Choose a ticket from the list to view its details and chat history.</p>
+                <h3 className="text-xl font-semibold text-blue-900 mb-3">Select a Ticket</h3>
+                <p className="text-blue-600">Choose a ticket from the list to view its summary, details, and chat history.</p>
               </div>
             )}
           </div>

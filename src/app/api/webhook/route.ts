@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Send the data to n8n webhook
-    const n8nResponse = await fetch("https://khvvtso.app.n8n.cloud/webhook-test/9b5f7142-0410-4e8d-ad62-f8d63fd39052", {
+    const n8nResponse = await fetch("https://khvvtso.app.n8n.cloud/webhook/9b5f7142-0410-4e8d-ad62-f8d63fd39052", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export async function GET() {
       endpoint: '/api/webhook',
       body: {
         text: 'Your message text',
-        n8nWebhookUrl: 'https://khvvtso.app.n8n.cloud/webhook-test/9b5f7142-0410-4e8d-ad62-f8d63fd39052'
+        n8nWebhookUrl: 'https://khvvtso.app.n8n.cloud/webhook/9b5f7142-0410-4e8d-ad62-f8d63fd39052'
       }
     },
     example: {

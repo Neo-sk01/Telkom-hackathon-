@@ -29,8 +29,8 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  //const n8nWebhookUrl = 'https://khvvtso.app.n8n.cloud/webhook/9b5f7142-0410-4e8d-ad62-f8d63fd39052';
-  const n8nWebhookUrl = 'https://khvvtso.app.n8n.cloud/webhook-test/9b5f7142-0410-4e8d-ad62-f8d63fd39052';
+  const n8nWebhookUrl = 'https://khvvtso.app.n8n.cloud/webhook/9b5f7142-0410-4e8d-ad62-f8d63fd39052';
+  //const n8nWebhookUrl = 'https://khvvtso.app.n8n.cloud/webhook-test/9b5f7142-0410-4e8d-ad62-f8d63fd39052';
   const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   const userId = 'user-telkom-12345';
   const [unsatisfiedCount, setUnsatisfiedCount] = useState(0);
@@ -187,7 +187,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
       setUnsatisfiedCount(newCount);
 
       // Check if escalation threshold is reached
-      if (newCount >= 1) {
+      if (newCount >=1) {
         await escalateToCallCentre();
       }
     }

@@ -27,7 +27,7 @@ export function summarizeChatHistory(chatHistory: ChatMessage[]): ChatSummary {
 
   // Extract customer messages (assuming odd indices are customer, even are bot)
   const customerMessages = chatHistory.filter((_, index) => index % 2 === 1);
-  const botMessages = chatHistory.filter((_, index) => index % 2 === 0);
+  // const botMessages = chatHistory.filter((_, index) => index % 2 === 0);
   
   // Calculate duration
   const startTime = new Date(chatHistory[0].timestamp);

@@ -83,11 +83,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
+interface ChatHistoryItem {
+  message: string;
+  timestamp: string;
+  satisfaction?: 'satisfied' | 'unsatisfied';
+}
+
 async function escalateToCallCentre(data: {
   sessionId: string;
   userId?: string;
   reason: string;
-  chatHistory: any[];
+  chatHistory: ChatHistoryItem[];
   attempts: number;
 }): Promise<CallCentreResponse> {
   // Simulate call centre API integration

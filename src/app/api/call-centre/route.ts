@@ -23,11 +23,11 @@ interface CallResponse {
 }
 
 // Simulated call centre phone numbers (in production, use real numbers)
-const CALL_CENTRE_NUMBERS = [
-  '+27-10-210-0001', // Primary agent
-  '+27-10-210-0002', // Secondary agent
-  '+27-10-210-0003', // Supervisor
-];
+// const CALL_CENTRE_NUMBERS = [
+//   '+27-10-210-0001', // Primary agent
+//   '+27-10-210-0002', // Secondary agent
+//   '+27-10-210-0003', // Supervisor
+// ];
 
 export async function POST(request: NextRequest) {
   try {
@@ -146,11 +146,22 @@ async function initiateCallCentreCall(data: CallRequest): Promise<CallResponse> 
   }
 }
 
+interface SessionData {
+  sessionId: string;
+  issue: string;
+  chatHistory: Array<{
+    message: string;
+    timestamp: string;
+    satisfaction?: 'satisfied' | 'unsatisfied';
+  }>;
+  urgency: 'low' | 'medium' | 'high';
+}
+
 async function makePhoneCall(params: {
   to: string;
   from: string;
   callId: string;
-  sessionData: any;
+  sessionData: SessionData;
 }): Promise<CallResponse> {
   // Simulate phone call API (replace with actual Twilio/AWS Connect integration)
   

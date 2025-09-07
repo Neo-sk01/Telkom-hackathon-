@@ -40,7 +40,7 @@ export default function Home() {
           </h2>
           <p className="text-xl text-blue-700 mb-8 max-w-3xl mx-auto">
             Experience lightning-fast internet, reliable mobile services, and 24/7 customer support 
-            with South Africa's leading telecommunications provider.
+            with South Africa&apos;s leading telecommunications provider.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">

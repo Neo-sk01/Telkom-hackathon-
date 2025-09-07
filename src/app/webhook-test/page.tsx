@@ -5,7 +5,16 @@ import { useState } from 'react';
 export default function WebhookTest() {
   const [text, setText] = useState('');
   const [n8nUrl, setN8nUrl] = useState('');
-  const [response, setResponse] = useState<any>(null);
+  interface WebhookResponse {
+    success: boolean;
+    data?: {
+      n8nResponse?: Array<{ output: string }>;
+      timestamp?: string;
+    };
+    error?: string;
+    details?: string;
+  }
+  const [response, setResponse] = useState<WebhookResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   const sendWebhook = async () => {
@@ -103,7 +112,7 @@ export default function WebhookTest() {
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-blue-700 mb-2">n8n Response:</h4>
                     <div className="space-y-3">
-                      {response.data.n8nResponse.map((item: any, index: number) => (
+                      {response.data.n8nResponse.map((item: { output: string }, index: number) => (
                         <div key={index} className="flex justify-start">
                           <div className="max-w-[85%] bg-white border border-blue-200 rounded-2xl rounded-bl-md p-4 shadow-sm">
                             <div className="flex items-start gap-3">
@@ -113,10 +122,10 @@ export default function WebhookTest() {
                               <div className="flex-1">
                                 <p className="text-gray-800 leading-relaxed">{item.output}</p>
                                 <p className="text-xs text-gray-400 mt-2">
-                                  {new Date(response.data.timestamp).toLocaleTimeString([], { 
+                                  {response.data?.timestamp ? new Date(response.data.timestamp).toLocaleTimeString([], { 
                                     hour: '2-digit', 
                                     minute: '2-digit' 
-                                  })}
+                                  }) : 'No timestamp'}
                                 </p>
                               </div>
                             </div>

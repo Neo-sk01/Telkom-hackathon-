@@ -2,13 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 
+interface N8nData {
+  n8nResponse?: Array<{ output: string }>;
+  timestamp?: string;
+}
+
 interface Message {
   id: string;
   text: string;
   isUser: boolean;
   timestamp: Date;
   isN8nResponse?: boolean;
-  n8nData?: any;
+  n8nData?: N8nData;
   satisfaction?: 'satisfied' | 'unsatisfied' | null;
   showFeedback?: boolean;
 }
@@ -34,9 +39,14 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
   const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   const userId = 'user-telkom-12345';
   const [unsatisfiedCount, setUnsatisfiedCount] = useState(0);
-  const [showEscalation, setShowEscalation] = useState(false);
+  // const [showEscalation, setShowEscalation] = useState(false);
   const [awaitingPhoneNumber, setAwaitingPhoneNumber] = useState(false);
-  const [pendingChatHistory, setPendingChatHistory] = useState<any[]>([]);
+  interface ChatHistoryItem {
+    message: string;
+    timestamp: string;
+    satisfaction?: 'satisfied' | 'unsatisfied';
+  }
+  const [pendingChatHistory, setPendingChatHistory] = useState<ChatHistoryItem[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -47,48 +57,48 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
     scrollToBottom();
   }, [messages]);
 
-  const generateBotResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('plan') || lowerMessage.includes('price') || lowerMessage.includes('cost')) {
-      return 'We have several plans available:\n• Starter: R299/month (20GB data)\n• Premium: R599/month (100GB data)\n• Business: R999/month (Unlimited data)\n\nWould you like more details about any specific plan?';
-    }
-    
-    if (lowerMessage.includes('fiber') || lowerMessage.includes('internet') || lowerMessage.includes('wifi')) {
-      return 'Our fiber internet offers speeds up to 1Gbps with reliable connectivity. We have various packages starting from R399/month. Would you like me to check availability in your area?';
-    }
-    
-    if (lowerMessage.includes('5g') || lowerMessage.includes('network') || lowerMessage.includes('coverage')) {
-      return 'Telkom\'s 5G network covers major cities and towns across South Africa. Our network provides excellent coverage with 99.9% uptime. You can check coverage in your area on our website or I can help you with that.';
-    }
-    
-    if (lowerMessage.includes('support') || lowerMessage.includes('help') || lowerMessage.includes('problem') || lowerMessage.includes('issue')) {
-      return 'I\'m here to help! For technical support, you can:\n• Chat with me for quick questions\n• Call our support line: 10210\n• Visit a Telkom store\n• Use our self-service portal\n\nWhat specific issue are you experiencing?';
-    }
-    
-    if (lowerMessage.includes('data') || lowerMessage.includes('bundle')) {
-      return 'We offer various data bundles:\n• Daily bundles from R5\n• Weekly bundles from R25\n• Monthly bundles from R99\n• Anytime data and night surfer options\n\nWhich type of data bundle interests you?';
-    }
-    
-    if (lowerMessage.includes('store') || lowerMessage.includes('location') || lowerMessage.includes('branch')) {
-      return 'You can find Telkom stores nationwide. Our major locations include:\n• Telkom Towers, Pretoria\n• Canal Walk, Cape Town\n• Sandton City, Johannesburg\n• Gateway, Durban\n\nWould you like me to help you find the nearest store to your location?';
-    }
-    
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-      return 'Hello! Welcome to Telkom. I\'m here to assist you with any questions about our services, plans, or support. What can I help you with today?';
-    }
-    
-    if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
-      return 'You\'re welcome! Is there anything else I can help you with regarding Telkom services?';
-    }
-    
-    if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye')) {
-      return 'Thank you for choosing Telkom! Have a great day. Feel free to chat with me anytime if you need assistance.';
-    }
-    
-    // Default response
-    return 'I understand you\'re asking about "' + userMessage + '". Let me connect you with the right information. You can also call our support line at 10210 for immediate assistance, or I can help you with:\n• Plans and pricing\n• Fiber internet\n• Mobile services\n• Technical support\n• Store locations';
-  };
+  // const generateBotResponse = (userMessage: string): string => {
+  //   const lowerMessage = userMessage.toLowerCase();
+  //   
+  //   if (lowerMessage.includes('plan') || lowerMessage.includes('price') || lowerMessage.includes('cost')) {
+  //     return 'We have several plans available:\n• Starter: R299/month (20GB data)\n• Premium: R599/month (100GB data)\n• Business: R999/month (Unlimited data)\n\nWould you like more details about any specific plan?';
+  //   }
+  //   
+  //   if (lowerMessage.includes('fiber') || lowerMessage.includes('internet') || lowerMessage.includes('wifi')) {
+  //     return 'Our fiber internet offers speeds up to 1Gbps with reliable connectivity. We have various packages starting from R399/month. Would you like me to check availability in your area?';
+  //   }
+  //   
+  //   if (lowerMessage.includes('5g') || lowerMessage.includes('network') || lowerMessage.includes('coverage')) {
+  //     return 'Telkom\'s 5G network covers major cities and towns across South Africa. Our network provides excellent coverage with 99.9% uptime. You can check coverage in your area on our website or I can help you with that.';
+  //   }
+  //   
+  //   if (lowerMessage.includes('support') || lowerMessage.includes('help') || lowerMessage.includes('problem') || lowerMessage.includes('issue')) {
+  //     return 'I\'m here to help! For technical support, you can:\n• Chat with me for quick questions\n• Call our support line: 10210\n• Visit a Telkom store\n• Use our self-service portal\n\nWhat specific issue are you experiencing?';
+  //   }
+  //   
+  //   if (lowerMessage.includes('data') || lowerMessage.includes('bundle')) {
+  //     return 'We offer various data bundles:\n• Daily bundles from R5\n• Weekly bundles from R25\n• Monthly bundles from R99\n• Anytime data and night surfer options\n\nWhich type of data bundle interests you?';
+  //   }
+  //   
+  //   if (lowerMessage.includes('store') || lowerMessage.includes('location') || lowerMessage.includes('branch')) {
+  //     return 'You can find Telkom stores nationwide. Our major locations include:\n• Telkom Towers, Pretoria\n• Canal Walk, Cape Town\n• Sandton City, Johannesburg\n• Gateway, Durban\n\nWould you like me to help you find the nearest store to your location?';
+  //   }
+  //   
+  //   if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+  //     return 'Hello! Welcome to Telkom. I\'m here to assist you with any questions about our services, plans, or support. What can I help you with today?';
+  //   }
+  //   
+  //   if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
+  //     return 'You\'re welcome! Is there anything else I can help you with regarding Telkom services?';
+  //   }
+  //   
+  //   if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye')) {
+  //     return 'Thank you for choosing Telkom! Have a great day. Feel free to chat with me anytime if you need assistance.';
+  //   }
+  //   
+  //   // Default response
+  //   return 'I understand you\'re asking about "' + userMessage + '". Let me connect you with the right information. You can also call our support line at 10210 for immediate assistance, or I can help you with:\n• Plans and pricing\n• Fiber internet\n• Mobile services\n• Technical support\n• Store locations';
+  // };
 
   const sendToN8n = async (text: string) => {
     if (!n8nWebhookUrl) return null;
@@ -142,7 +152,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
     setTimeout(() => {
       if (n8nResponse && n8nResponse.success && n8nResponse.data?.n8nResponse) {
         // Add n8n AI response as chat bubble
-        n8nResponse.data.n8nResponse.forEach((item: any, index: number) => {
+        n8nResponse.data.n8nResponse.forEach((item: { output: string }, index: number) => {
           const n8nMessage: Message = {
             id: `n8n-${Date.now()}-${index}`,
             text: item.output,
@@ -198,7 +208,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
       const chatHistory = messages.map(msg => ({
         message: msg.text,
         timestamp: msg.timestamp.toISOString(),
-        satisfaction: msg.satisfaction
+        satisfaction: msg.satisfaction === null ? undefined : msg.satisfaction
       }));
 
       // Save chat history to localStorage for admin dashboard
@@ -230,7 +240,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
       const escalationData = await escalationResponse.json();
       
       if (escalationData.escalate) {
-        setShowEscalation(true);
+        // setShowEscalation(true);
         
         // Trigger call initiation event for localStorage sync
         const callInitiatedEvent = new CustomEvent('callInitiated', {
@@ -261,7 +271,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
     }
   };
 
-  const requestPhoneNumber = async (chatHistory: any[]) => {
+  const requestPhoneNumber = async (chatHistory: ChatHistoryItem[]) => {
     setPendingChatHistory(chatHistory);
     setAwaitingPhoneNumber(true);
     
@@ -319,7 +329,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
     await initiatePhoneCall(phoneNumber, pendingChatHistory);
   };
 
-  const initiatePhoneCall = async (customerPhone: string, chatHistory: any[]) => {
+  const initiatePhoneCall = async (customerPhone: string, chatHistory: ChatHistoryItem[]) => {
     try {
 
       const callResponse = await fetch('/api/call-centre', {
